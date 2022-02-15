@@ -1,0 +1,22 @@
+{
+   "name": "Maticulum",
+   "version": "0.0.1",
+   "description": "",
+   "main": "truffle-config.js",
+   "directories": {
+      "test": "test"
+   },
+   "dependencies": {
+      "@openzeppelin/contracts": "^4.5.0",
+      "@openzeppelin/test-helpers": "^0.5.12",
+      "@truffle/hdwallet-provider": "^1.7.0",
+      "chai": "^4.3.4",
+      "dotenv": "^10.0.0",
+      "solidity-docgen": "^0.5.13",
+      "webpack": "4.41.0"
+   },
+   "devDependencies": {
+      "gh-pages": "^3.2.3",
+      "solc-0.8": "npm:solc@0.8.4"
+   }
+}
