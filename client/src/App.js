@@ -1,11 +1,13 @@
 import React, { Component } from "react";
-import SimpleStorageContract from "./contracts/SimpleStorage.json";
+import { Button, Card, Form, Container, Row, Col } from 'react-bootstrap';
+import EscrowContract from "./contracts/Escrow.json";
+import GoodHoneyTokenContract from "./contracts/GoodHoneyToken.json";
 import getWeb3 from "./getWeb3";
 
 import "./App.css";
 
 class App extends Component {
-  state = { storageValue: 0, web3: null, accounts: null, contract: null };
+  state = { storageValue: '', web3: null, accounts: null, contract: null };
 
   componentDidMount = async () => {
     try {
@@ -17,11 +19,15 @@ class App extends Component {
 
       // Get the contract instance.
       const networkId = await web3.eth.net.getId();
-      const deployedNetwork = SimpleStorageContract.networks[networkId];
+      const deployedNetwork = EscrowContract.networks[networkId];
       const instance = new web3.eth.Contract(
-        SimpleStorageContract.abi,
+        EscrowContract.abi,
         deployedNetwork && deployedNetwork.address,
       );
+	  
+	  
+	  
+	  console.log(deployedNetwork.address);
 
       // Set web3, accounts, and contract to the state, and then proceed with an
       // example of interacting with the contract's methods.
@@ -38,35 +44,84 @@ class App extends Component {
   runExample = async () => {
     const { accounts, contract } = this.state;
 
-    // Stores a given value, 5 by default.
-    await contract.methods.set(5).send({ from: accounts[0] });
-
     // Get the value from the contract to prove it worked.
-    const response = await contract.methods.get().call();
+    const response = 'test'; //await contract.methods.tokenGHN().call();
+	console.log(1);
+	let price = await contract.methods.getUsdPrice(1).call({from: accounts[0]});
+	console.log(price);
+	
+	this.addressDeposit.value = "0x8514F67A9445584A11e9dfed90a2323aD7A78662";
+	let moneyDeposit = await contract.methods.payments(this.addressDeposit.value).call({from: accounts[0]});
 
-    // Update state with the result.
+	this.MoneyDeposit.value = moneyDeposit / 1000000000000000000;
+
+	// Update state with the result.
     this.setState({ storageValue: response });
   };
+  
+  sendMoneyToEscrow = async() => {
+	const { accounts, contract } = this.state; 
+	await contract.methods.SendMoneyTo(this.addressToDepose.value,this.ethMoney.value).send({from: accounts[0]});	
+  }
+  
+  SendMoneyToAdress = async() => {
+	  const { accounts, contract } = this.state; 
+	  await contract.methods.withdrawPaymentsUSDC(this.addressDeposit.value).send({from: accounts[0]});	
+	  
+  }
 
   render() {
-    if (!this.state.web3) {
-      return <div>Loading Web3, accounts, and contract...</div>;
-    }
     return (
-      <div className="App">
-        <h1>Good to Go!</h1>
-        <p>Your Truffle Box is installed and ready.</p>
-        <h2>Smart Contract Example</h2>
-        <p>
-          If your contracts compiled and migrated successfully, below will show
-          a stored value of 5 (by default).
-        </p>
-        <p>
-          Try changing the value stored on <strong>line 40</strong> of App.js.
-        </p>
-        <div>The stored value is: {this.state.storageValue}</div>
-      </div>
-    );
+		<div>	
+			<Container>
+				<Form.Group as={Row} >
+						<Form.Label column sm="3"></Form.Label>
+					</Form.Group>
+				<Form>
+					<Form.Group as={Row} >	
+						<Form.Label column sm="3"></Form.Label>						
+						<Col sm="2"> Money : 
+						  <Form.Control type="text" id="ethMoney" 
+					      ref={(input) => { this.ethMoney = input }}
+						  />
+						</Col>
+						<Col sm="2"> Address : 
+						  <Form.Control type="text" id="addressToDepose" 
+					      ref={(input) => { this.addressToDepose = input }}
+						  />
+						</Col>
+					</Form.Group>
+					<Form.Group as={Row} >	
+						<Form.Label column sm="3"></Form.Label>						
+						<Col sm="2">
+						  <Button onClick={ this.sendMoneyToEscrow }>Depose money on Escrow</Button> 
+						</Col>
+						<Col sm="2"> Address with money : 
+						  <Form.Control type="text" id="addressDeposit" 
+					      ref={(input) => { this.addressDeposit = input }}
+						  />
+						</Col>
+						<Col sm="2"> Money on this address: 
+						  <Form.Control type="text" id="MoneyDeposit" 
+					      ref={(input) => { this.MoneyDeposit = input }}
+						  /> $
+						</Col>
+						<Col sm="2">
+						  <Button onClick={ this.SendMoneyToAdress }>Send Money to Adress</Button> 
+						</Col>
+					</Form.Group>
+					<Form.Group as={Row} >	
+						<img src={this.state.imageUrl}/>
+						<div id="diplomasImage"></div>
+					</Form.Group>
+					
+					
+				</Form>
+			</Container>
+		</div>
+		
+			
+		);
   }
 }
 
